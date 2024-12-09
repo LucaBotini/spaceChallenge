@@ -1,13 +1,14 @@
 package mygame;
 
 import java.awt.Component;
-import javax.swing.JFrame;
+import javax.swing.*;
+
 import mygame.Model.Phase;
 
 public class Container extends JFrame {
     public Container() {
         this.add(new Phase());
-        this.setTitle("My Game");
+        this.setTitle("Space Challenge 🚀");
         this.setSize(1024, 728);
         this.setDefaultCloseOperation(3);
         this.setLocationRelativeTo((Component)null);

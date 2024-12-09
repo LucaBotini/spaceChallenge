@@ -10,12 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Phase extends JPanel implements ActionListener {
-    private Image bottom;
-    private Player player;
-    private Timer timer;
     private List<Enemy1> enemy1;
     private List<Stars> stars;
-    private boolean inGame;
+    private TurboOnOff turboOnOff;
+    private Player player;
+    private Timer timer, progress;
+    private Image bottom;
+    private int enemyKilled, progressS;
+    private boolean inGame, goMusic, finish, activedTurbo;
 
 
     public Phase() {
@@ -24,21 +26,36 @@ public class Phase extends JPanel implements ActionListener {
         String path = "src\\res\\background.png";
         ImageIcon reference = new ImageIcon(path); //recebe a imagem
         bottom = reference.getImage(); // variavel de referencia para imagem
-
-        player = new Player();
+        player = new Player(this);
         player.load();
+        turboOnOff = new TurboOnOff(920, 10);
+        turboOnOff.load();
 
         addKeyListener(new keyboardAdapter());
 
         timer = new Timer(5, this); //speed for game
         timer.start();
+        activedTurbo = false;
+        inGame = true;
+
         initEnemy();
         initStars();
-        inGame = true;
+
+        finish = false;
+        progress = new Timer(27000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                inGame = false;
+                finish = true;
+            }
+        });
+        progress.start();
+        player.playSound("src/res/sound.wav");
+
     }
 
     public void initEnemy() {
-        int coords[] = new int[40]; //inimigos começa com 40
+        int coords[] = new int[40]; //inimigos começa em 100
         enemy1 = new ArrayList<Enemy1>();
         for (int i = 0; i < coords.length; i++) {
             int x = (int) (Math.random() * 8000 + 1024); //aparecer o inimigo aleatorio na tela;
@@ -57,16 +74,36 @@ public class Phase extends JPanel implements ActionListener {
         }
     }
 
+    public void restartGame() {
+        player.load();
+        turboOnOff.load();
+        enemyKilled = 0;
+        initEnemy();
+        initStars();
+        activedTurbo = false;
+        goMusic = false;
+        finish = false;
+        inGame = true;
+    }
+
     public void paint(Graphics g) {
         Graphics2D graphics = (Graphics2D) g;
         if (inGame) {
             graphics.drawImage(bottom, 0, 0, null);//colocando a imagem de fato na janela
+            graphics.setFont(new Font("Arial", Font.BOLD, 20)); // Configura a fonte
+            graphics.setColor(Color.RED); // Configura a cor do texto
+
+            graphics.drawString("Kills: " + enemyKilled, 10, 30);
+            graphics.drawString("Objective: 30 kills", 10, 60);
+
+
             for (int p = 0; p < stars.size(); p++) {
                 Stars q = stars.get(p);
                 q.load();
                 graphics.drawImage(q.getImage(), q.getX(), q.getY(), this);
             }
             graphics.drawImage(player.getImage(), player.getX(), player.getY(), this);
+            graphics.drawImage(turboOnOff.getImage(), turboOnOff.getX(), turboOnOff.getY(), this);
             List<Shot> shots = player.getShots();
             for (int i = 0; i < shots.size(); i++) {
                 Shot m = shots.get(i);
@@ -80,17 +117,41 @@ public class Phase extends JPanel implements ActionListener {
                 graphics.drawImage(in.getImage(), in.getX(), in.getY(), this);
             }
         } else {
+            try {
+                Thread.sleep(1000); // Aguarda 5 segundos
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            // Para o som
+            player.stopSound();
+
             ImageIcon endGame = new ImageIcon("src/res/gameOver.png");
             graphics.drawImage(endGame.getImage(), 0, 0, null);
+        }
+
+        if (finish) {
+            if (enemyKilled < 30) {
+                ImageIcon endGame = new ImageIcon("src/res/gameOver.png");
+                graphics.drawImage(endGame.getImage(), 0, 0, null);
+            } else {
+
+                ImageIcon endGameWin = new ImageIcon("src/res/youWin.png");
+                graphics.drawImage(endGameWin.getImage(), 0, 0, null);
+
+            }
         }
 
         g.dispose();
     }
 
+
     @Override
     public void actionPerformed(ActionEvent e) {
         player.update();
         if (player.isTurbo()) {
+            turboOnOff.usedTurbo();
+            activedTurbo = true;
             timer.setDelay(1);
             Stars.setSPEED(12);
             Enemy1.setSPEED(12);
@@ -147,10 +208,16 @@ public class Phase extends JPanel implements ActionListener {
             if (shapeShip.intersects(shapeEnemy1)) {
                 if (player.isTurbo()) {
                     tempEnemy1.setVisible(false);
+                    enemyKilled++;
                 } else {
                     player.setVisible(false);
                     tempEnemy1.setVisible(false);
                     inGame = false;
+                    player.stopSound();
+                    if (!goMusic) {
+                        player.playSound("src/res/soundGameOver.wav");
+                        goMusic = true;
+                    }
                 }
             }
         }
@@ -165,13 +232,24 @@ public class Phase extends JPanel implements ActionListener {
                 if (shapeShot.intersects(shapeEnemy1)) {
                     tempEnemy1.setVisible(false);
                     tempShot.setVisible(false);
+                    enemyKilled++;
                 }
+
             }
         }
 
     }
 
+    public boolean isActivedTurbo() {
+        return activedTurbo;
+    }
+
+    public boolean isInGame() {
+        return inGame;
+    }
+
     private class keyboardAdapter extends KeyAdapter {
+
         @Override
         public void keyPressed(KeyEvent e) {
             player.keyPressed(e);
@@ -182,6 +260,5 @@ public class Phase extends JPanel implements ActionListener {
             player.keyRelease(e);
         }
     }
-
 
 }

@@ -18,6 +18,7 @@ public class Enemy1 {
         isVisible = true;
     }
 
+
     public void load() {
         ImageIcon reference = new ImageIcon("src/res/enemyOne.png");
         image = reference.getImage();

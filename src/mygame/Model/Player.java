@@ -1,5 +1,6 @@
 package mygame.Model;
 
+import javax.sound.sampled.AudioFormat;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -7,17 +8,24 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
+import javax.sound.sampled.*;
+import java.io.File;
+import java.io.IOException;
 
 public class Player implements ActionListener {
+    private Phase phase;
     private int x, y;
     private int dx, dy;
-    private Image image;
+    private Image image, imageTurbo;
     private int height, width;
     private List<Shot> shots;
     private boolean isVisible, isTurbo;
     private Timer timerP;
+    private Clip audioClip;
 
-    public Player() {
+    public Player(Phase phase) {
+
+        this.phase = phase;
         this.x = 100;
         this.y = 100;
         isVisible = true;
@@ -42,6 +50,7 @@ public class Player implements ActionListener {
     }
 
     public void load() {
+
         //definir imagem do player
         String path = "src/res/spaceShip.png";
         ImageIcon reference = new ImageIcon(path);
@@ -57,6 +66,40 @@ public class Player implements ActionListener {
         //fazendo a movimentação
     }
 
+    public void playSound(String soundFilePath) {
+        try {
+            // Carrega o arquivo de áudio
+            File soundFile = new File(soundFilePath);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
+
+            // Obtém o formato e a linha de áudio
+            AudioFormat format = audioStream.getFormat();
+            DataLine.Info info = new DataLine.Info(Clip.class, format);
+            audioClip = (Clip) AudioSystem.getLine(info);
+
+            // Abre o áudio e toca
+            audioClip.open(audioStream);
+            audioClip.start();
+        } catch (UnsupportedAudioFileException | LineUnavailableException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void stopSound() {
+        if (audioClip != null) {
+            System.out.println("Is running: " + audioClip.isRunning());
+            if (audioClip.isRunning()) {
+                audioClip.stop();
+                System.out.println("Audio stopped.");
+            }
+            audioClip.close();
+            System.out.println("Audio resources released.");
+            audioClip = null;
+        } else {
+            System.out.println("No audio to stop.");
+        }
+    }
+
     public Rectangle getBounds() {
         return new Rectangle(x, y, width, height);
     }
@@ -69,20 +112,34 @@ public class Player implements ActionListener {
         isTurbo = true;
         ImageIcon reference = new ImageIcon("src/res/spaceShipTurbo.png");
         image = reference.getImage();
+
+        ImageIcon reference2 = new ImageIcon("src/res/activedTurbo.png");
+        imageTurbo = reference2.getImage();
+
+        height = imageTurbo.getHeight(null);
+        width = imageTurbo.getWidth(null);
     }
 
-
     public void keyPressed(KeyEvent key) {
+
         int code = key.getKeyCode();
 
         switch (code) {
+            case KeyEvent.VK_ENTER:
+                if (!phase.isInGame()) {
+                    phase.restartGame();
+                }
+                break;
             case KeyEvent.VK_SPACE:
                 if (!isTurbo) {
                     simpleShot();
+                    playSound("src/res/lasergun.wav");
                 }
                 break;
             case KeyEvent.VK_SHIFT:
-                turbo();
+                if (!phase.isActivedTurbo()) {
+                    turbo();
+                }
                 break;
             case KeyEvent.VK_W:
                 dy = -6;
@@ -117,6 +174,7 @@ public class Player implements ActionListener {
                 break;
         }
     }
+
 
     public boolean isVisible() {
         return isVisible;
