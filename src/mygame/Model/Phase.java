@@ -28,6 +28,7 @@ public class Phase extends JPanel implements ActionListener {
         bottom = reference.getImage(); // variavel de referencia para imagem
         player = new Player(this);
         player.load();
+
         turboOnOff = new TurboOnOff(920, 10);
         turboOnOff.load();
 
@@ -151,6 +152,7 @@ public class Phase extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
         player.update();
         if (player.isTurbo()) {
             turboOnOff.usedTurbo();
@@ -253,6 +255,8 @@ public class Phase extends JPanel implements ActionListener {
         return inGame;
     }
 
+
+
     private class keyboardAdapter extends KeyAdapter {
 
         @Override
@@ -265,5 +269,6 @@ public class Phase extends JPanel implements ActionListener {
             player.keyRelease(e);
         }
     }
+
 
 }

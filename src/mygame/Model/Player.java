@@ -13,28 +13,27 @@ import java.io.File;
 import java.io.IOException;
 
 public class Player implements ActionListener {
+//    private Lobby lobby;
     private Phase phase;
     private int x, y;
     private int dx, dy;
     private Image image, imageTurbo;
     private int height, width;
     private List<Shot> shots;
-    private boolean isVisible, isTurbo;
+    private boolean isVisible, isTurbo, shotOnOff;
     private Timer timerP;
     private Clip audioClip, soundtrack, soundWin;
-
+    long lastShotTime = 0;
     public Player(Phase phase) {
-
         this.phase = phase;
         this.x = 100;
         this.y = 100;
         isVisible = true;
         isTurbo = false;
+        shotOnOff = true;
         // estamos definindo onde o player vai spawnar
 
         shots = new ArrayList<Shot>();
-        timerP = new Timer(5000, this);
-        timerP.start();
     }
 
     @Override
@@ -101,7 +100,6 @@ public class Player implements ActionListener {
 
     public void playSoundSoundtrack(String soundFilePath) {
         try {
-            // Pare e libere o som atual antes de iniciar um novo
             if (soundtrack != null) {
                 if (soundtrack.isRunning()) {
                     soundtrack.stop();
@@ -148,10 +146,13 @@ public class Player implements ActionListener {
     }
 
     public void simpleShot() {
+
         this.shots.add(new Shot(x + width, y));
     }
 
     public void turbo() {
+        timerP = new Timer(5000, this);
+        timerP.start();
         isTurbo = true;
         ImageIcon reference = new ImageIcon("src/res/spaceShipTurbo.png");
         image = reference.getImage();
@@ -175,8 +176,15 @@ public class Player implements ActionListener {
                 break;
             case KeyEvent.VK_SPACE:
                 if (!isTurbo) {
-                    simpleShot();
-                    playSound("src/res/lasergun.wav");
+                    long currentTime = System.currentTimeMillis();
+                    shotOnOff = true;
+                    if (currentTime - lastShotTime >= 500 ) {
+                        simpleShot();
+                        lastShotTime = currentTime;
+                        playSound("src/res/lasergun.wav");
+                    }else{
+                        shotOnOff = false;
+                    }
                 }
                 break;
             case KeyEvent.VK_SHIFT:
@@ -198,7 +206,6 @@ public class Player implements ActionListener {
                 break;
         }
     }
-
     public void keyRelease(KeyEvent key) {
         int code = key.getKeyCode();
 
@@ -258,4 +265,10 @@ public class Player implements ActionListener {
     public Clip getSoundWin() {
         return soundWin;
     }
+
+    public boolean isShotOnOff() {
+        return shotOnOff;
+    }
+
+
 }

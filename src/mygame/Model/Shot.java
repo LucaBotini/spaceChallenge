@@ -2,12 +2,15 @@ package mygame.Model;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Shot {
     private Image image;
     private int x, y;
     private int height, width;
     private boolean isVisible;
+    private Timer loadingShot;
 
     private static final int WIDTH = 938;
     private static int SPEED = 7;
