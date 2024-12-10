@@ -17,7 +17,7 @@ public class Phase extends JPanel implements ActionListener {
     private Timer timer, progress;
     private Image bottom;
     private int enemyKilled, progressS;
-    private boolean inGame, goMusic, finish, activedTurbo;
+    private boolean inGame, goMusic, finish, activedTurbo,soundWin;
 
 
     public Phase() {
@@ -50,7 +50,7 @@ public class Phase extends JPanel implements ActionListener {
             }
         });
         progress.start();
-        player.playSound("src/res/sound.wav");
+        player.playSoundSoundtrack("src/res/sound.wav");
 
     }
 
@@ -75,13 +75,20 @@ public class Phase extends JPanel implements ActionListener {
     }
 
     public void restartGame() {
+        player.stopSounWin();
+        player.stopAllSounds();
+        progress.stop();
+        progress.start();
+        player = new Player(this);
         player.load();
+        player.playSoundSoundtrack("src/res/sound.wav");
         turboOnOff.load();
         enemyKilled = 0;
         initEnemy();
         initStars();
         activedTurbo = false;
         goMusic = false;
+        soundWin = false;
         finish = false;
         inGame = true;
     }
@@ -117,28 +124,24 @@ public class Phase extends JPanel implements ActionListener {
                 graphics.drawImage(in.getImage(), in.getX(), in.getY(), this);
             }
         } else {
-            try {
-                Thread.sleep(1000); // Aguarda 5 segundos
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            // Para o som
-            player.stopSound();
-
             ImageIcon endGame = new ImageIcon("src/res/gameOver.png");
             graphics.drawImage(endGame.getImage(), 0, 0, null);
         }
 
         if (finish) {
+            if (player.getSoundtrack() != null) {
+                player.stopAllSounds();
+            }
             if (enemyKilled < 30) {
                 ImageIcon endGame = new ImageIcon("src/res/gameOver.png");
                 graphics.drawImage(endGame.getImage(), 0, 0, null);
             } else {
-
                 ImageIcon endGameWin = new ImageIcon("src/res/youWin.png");
                 graphics.drawImage(endGameWin.getImage(), 0, 0, null);
-
+                if(!soundWin){
+                    player.playSoundWin("src/res/VictoryThemeAyrtonSenna.wav");
+                    soundWin = true;
+                }
             }
         }
 
@@ -213,7 +216,9 @@ public class Phase extends JPanel implements ActionListener {
                     player.setVisible(false);
                     tempEnemy1.setVisible(false);
                     inGame = false;
-                    player.stopSound();
+                    if (player.getSoundtrack() != null) {
+                        player.stopAllSounds();
+                    }
                     if (!goMusic) {
                         player.playSound("src/res/soundGameOver.wav");
                         goMusic = true;

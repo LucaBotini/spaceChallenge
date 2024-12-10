@@ -9,6 +9,8 @@ public class Container extends JFrame {
     public Container() {
         this.add(new Phase());
         this.setTitle("Space Challenge 🚀");
+        ImageIcon icone = new ImageIcon("src/res/space.png");
+        this.setIconImage(icone.getImage());
         this.setSize(1024, 728);
         this.setDefaultCloseOperation(3);
         this.setLocationRelativeTo((Component)null);

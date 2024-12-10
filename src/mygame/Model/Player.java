@@ -21,7 +21,7 @@ public class Player implements ActionListener {
     private List<Shot> shots;
     private boolean isVisible, isTurbo;
     private Timer timerP;
-    private Clip audioClip;
+    private Clip audioClip, soundtrack, soundWin;
 
     public Player(Phase phase) {
 
@@ -71,12 +71,10 @@ public class Player implements ActionListener {
             // Carrega o arquivo de áudio
             File soundFile = new File(soundFilePath);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
-
             // Obtém o formato e a linha de áudio
             AudioFormat format = audioStream.getFormat();
             DataLine.Info info = new DataLine.Info(Clip.class, format);
             audioClip = (Clip) AudioSystem.getLine(info);
-
             // Abre o áudio e toca
             audioClip.open(audioStream);
             audioClip.start();
@@ -84,19 +82,64 @@ public class Player implements ActionListener {
             e.printStackTrace();
         }
     }
+    public void playSoundWin(String soundFilePath) {
+        try {
+            // Carrega o arquivo de áudio
+            File soundFile = new File(soundFilePath);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
+            // Obtém o formato e a linha de áudio
+            AudioFormat format = audioStream.getFormat();
+            DataLine.Info info = new DataLine.Info(Clip.class, format);
+            soundWin = (Clip) AudioSystem.getLine(info);
+            // Abre o áudio e toca
+            soundWin.open(audioStream);
+            soundWin.start();
+        } catch (UnsupportedAudioFileException | LineUnavailableException | IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-    public void stopSound() {
-        if (audioClip != null) {
-            System.out.println("Is running: " + audioClip.isRunning());
-            if (audioClip.isRunning()) {
-                audioClip.stop();
-                System.out.println("Audio stopped.");
+    public void playSoundSoundtrack(String soundFilePath) {
+        try {
+            // Pare e libere o som atual antes de iniciar um novo
+            if (soundtrack != null) {
+                if (soundtrack.isRunning()) {
+                    soundtrack.stop();
+                }
+                soundtrack.close();
             }
+
+            // Carrega o arquivo de áudio
+            File soundFile = new File(soundFilePath);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
+            // Obtém o formato e a linha de áudio
+            AudioFormat format = audioStream.getFormat();
+            DataLine.Info info = new DataLine.Info(Clip.class, format);
+            soundtrack = (Clip) AudioSystem.getLine(info);
+            // Abre o áudio e toca
+            soundtrack.open(audioStream);
+            soundtrack.loop(Clip.LOOP_CONTINUOUSLY);
+            soundtrack.start();
+        } catch (UnsupportedAudioFileException | LineUnavailableException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void stopAllSounds() {
+        if (soundtrack != null && soundtrack.isRunning()) {
+            soundtrack.stop();
+            soundtrack.close();
+        }
+        if (audioClip != null && audioClip.isRunning()) {
+            audioClip.stop();
             audioClip.close();
-            System.out.println("Audio resources released.");
-            audioClip = null;
-        } else {
-            System.out.println("No audio to stop.");
+        }
+    }
+
+    public void stopSounWin(){
+        if (soundWin != null && soundWin.isRunning()) {
+            soundWin.stop();
+            soundWin.close();
         }
     }
 
@@ -141,16 +184,16 @@ public class Player implements ActionListener {
                     turbo();
                 }
                 break;
-            case KeyEvent.VK_W:
+            case KeyEvent.VK_W, KeyEvent.VK_UP:
                 dy = -6;
                 break;
-            case KeyEvent.VK_S:
+            case KeyEvent.VK_S, KeyEvent.VK_DOWN:
                 dy = 6;
                 break;
-            case KeyEvent.VK_A:
+            case KeyEvent.VK_A, KeyEvent.VK_LEFT:
                 dx = -6;
                 break;
-            case KeyEvent.VK_D:
+            case KeyEvent.VK_D, KeyEvent.VK_RIGHT:
                 dx = 6;
                 break;
         }
@@ -160,16 +203,16 @@ public class Player implements ActionListener {
         int code = key.getKeyCode();
 
         switch (code) {
-            case KeyEvent.VK_W:
+            case KeyEvent.VK_W, KeyEvent.VK_UP:
                 dy = 0;
                 break;
-            case KeyEvent.VK_S:
+            case KeyEvent.VK_S, KeyEvent.VK_DOWN:
                 dy = 0;
                 break;
-            case KeyEvent.VK_A:
+            case KeyEvent.VK_A, KeyEvent.VK_LEFT:
                 dx = 0;
                 break;
-            case KeyEvent.VK_D:
+            case KeyEvent.VK_D, KeyEvent.VK_RIGHT:
                 dx = 0;
                 break;
         }
@@ -206,5 +249,13 @@ public class Player implements ActionListener {
 
     public void setTurbo(boolean turbo) {
         isTurbo = turbo;
+    }
+
+    public Clip getSoundtrack() {
+        return soundtrack;
+    }
+
+    public Clip getSoundWin() {
+        return soundWin;
     }
 }
