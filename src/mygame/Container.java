@@ -3,13 +3,13 @@ package mygame;
 import java.awt.Component;
 import javax.swing.*;
 
-//import mygame.Model.Lobby;
+import mygame.Model.Lobby;
 import mygame.Model.Phase;
 
 public class Container extends JFrame {
     public Container() {
-//        this.add(new Lobby(this));
-        this.add(new Phase());
+        this.add(new Lobby(this));
+//        this.add(new Phase());
         this.setTitle("Space Challenge 🚀");
         ImageIcon icone = new ImageIcon("src/res/space.png");
         this.setIconImage(icone.getImage());
@@ -20,12 +20,21 @@ public class Container extends JFrame {
         this.setVisible(true);
     }
 
-//    public void changeToPhase() {
-//        this.getContentPane().removeAll(); // Remove o painel atual
-//        this.add(new Phase()); // Adiciona o novo painel
-//        this.revalidate(); // Atualiza o layout
-//        this.repaint(); // Re-renderiza a janela
-//    }
+    public void changeToPhase() {
+        this.getContentPane().removeAll(); // Remove o painel atual
+        Component add = this.add(new Phase());// Adiciona o novo painel
+        this.revalidate(); // Atualiza o layout
+        this.repaint(); // Re-renderiza a janela
+        add.requestFocusInWindow();
+    }
+
+    public void changeToLobby() {
+        this.getContentPane().removeAll(); // Remove o painel atual
+        Component add = this.add(new Lobby(this)); // Adiciona o lobby de volta
+        this.revalidate(); // Atualiza o layout
+        this.repaint(); // Re-renderiza a janela
+        add.requestFocusInWindow();
+    }
 
     public static void main(String[] args) {
         new Container();

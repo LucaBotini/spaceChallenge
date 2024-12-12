@@ -17,12 +17,13 @@ public class Phase extends JPanel implements ActionListener {
     private Timer timer, progress;
     private Image bottom;
     private int enemyKilled, progressS;
-    private boolean inGame, goMusic, finish, activedTurbo,soundWin;
+    private boolean inGame, goMusic, finish, activedTurbo, soundWin;
 
 
     public Phase() {
         setFocusable(true);
         setDoubleBuffered(true);
+        this.requestFocusInWindow();
         String path = "src\\res\\background.png";
         ImageIcon reference = new ImageIcon(path); //recebe a imagem
         bottom = reference.getImage(); // variavel de referencia para imagem
@@ -139,7 +140,7 @@ public class Phase extends JPanel implements ActionListener {
             } else {
                 ImageIcon endGameWin = new ImageIcon("src/res/youWin.png");
                 graphics.drawImage(endGameWin.getImage(), 0, 0, null);
-                if(!soundWin){
+                if (!soundWin) {
                     player.playSoundWin("src/res/VictoryThemeAyrtonSenna.wav");
                     soundWin = true;
                 }
@@ -254,7 +255,6 @@ public class Phase extends JPanel implements ActionListener {
     public boolean isInGame() {
         return inGame;
     }
-
 
 
     private class keyboardAdapter extends KeyAdapter {

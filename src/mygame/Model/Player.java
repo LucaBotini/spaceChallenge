@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 
 public class Player implements ActionListener {
-//    private Lobby lobby;
     private Phase phase;
     private int x, y;
     private int dx, dy;
@@ -169,6 +168,8 @@ public class Player implements ActionListener {
         int code = key.getKeyCode();
 
         switch (code) {
+            case KeyEvent.VK_ESCAPE:
+                break;
             case KeyEvent.VK_ENTER:
                 if (!phase.isInGame()) {
                     phase.restartGame();
